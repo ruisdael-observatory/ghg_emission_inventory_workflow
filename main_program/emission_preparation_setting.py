@@ -1,14 +1,14 @@
 """
 Module Description:
 The general setting file to prepare 
-area and point source emission input for DALES model to simulate the Netherlands enviroment
+area and point source GHG emission input for DALES to simulate the Netherlands environment.
 
-This is the main setting file, common for all scripts needed to prepare emissions
+This is the main setting file, common for all modules of workflow.
 
 In addition, in file ruisdael_area_residuals there is a setting, if you need to update some of SNAP categories
-and large country domain settings
+and large country-size domain settings.
 
-Also, functions in emission_construction_functions can be updated as the list of subcategories are listed there
+Also, functions in emission_construction_functions can be updated/changed as the list of subcategories is listed there.
 
 Author: Dr. Arseni Doyennel
 e-mail: a.doyennel@vu.nl
