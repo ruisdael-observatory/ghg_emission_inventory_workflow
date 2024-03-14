@@ -33,10 +33,10 @@ import glob
 
 from emission_preparation_setting import (year_start, month_start, day_start,
                                             hour_start, year_end, month_end, day_end, hour_end,
-                                            x0, y0, xsize, ysize, itot, jtot, ktot, nprocx, nprocy,
-                                            spec_name, private_data_points,
+                                            x0, y0, xres, yres, xsize, ysize, itot, jtot, ktot, nprocx, nprocy,
+                                            spec_name, point_source_harm_file,
                                             datadir_point_source_plume_processing,
-                                            targetdir_point_source_plume_processing )
+                                            targetdir_point_source_plume_processing, point_file_harm_p_only )
 
 
 class Pointsource_input_preparation:
@@ -44,7 +44,7 @@ class Pointsource_input_preparation:
 
         self.datadir = datadir_point_source_plume_processing
         self.targetdir = targetdir_point_source_plume_processing
-        self.pointsourcefile = private_data_points
+        self.pointsourcefile = point_source_harm_file
         self.year_sim = year_start  # if emissions are used for other year, put the needed year in year_start of setting file!
         self.month_start = month_start
         self.day_start = day_start
@@ -56,6 +56,8 @@ class Pointsource_input_preparation:
         self.minute = 0
         self.x0 = x0
         self.y0 = y0
+        self.xres = xres
+        self.yres = yres
         self.xsize = xsize
         self.ysize = ysize
         self.itot = itot
@@ -128,10 +130,16 @@ class Pointsource_input_preparation:
 
         return df, df_orig
 
-    # Gapfilling = NOTE: Qualitative grouping of emissioncauses suitable for regression ===============================
+    # NOTE: Qualitative grouping of emission causes suitable for regression ===============================
 
     def prepare_emission_data(self, df):
         # Code for preparing emission data
+        
+        # Initialize df_selection_non_rem_full and df_gapfilled_full as empty DataFrames:
+        df_selection_non_rem_full = pd.DataFrame()
+        df_gapfilled_full = pd.DataFrame()
+        
+        df_selection_rem_full = pd.DataFrame()
         
         #Create a target dir:
         self.create_target_directory()
@@ -141,11 +149,15 @@ class Pointsource_input_preparation:
 
         # Save the empty DataFrame to a CSV file
         #Remaining points for which unsufficient cohesive data is available for regression are put together 
-        #into point_source_unassigned.csv to be used in the area emissions.
+        #into point_source_unassigned.csv to be used in the area emissions (see static module!)
         
         df_empty.to_csv(self.targetdir + 'point_source_unassigned.csv', index=False)
 
-
+        #these groups will be concidered in point sources, all the rest will be put in unassigned and used in area emissions:
+        #probably, the reason why PS from only these groups are considered is that point sources from these groups 
+        #are originate from specific sources like chimneys, exhaust stacks, or vents, 
+        #making them distinct from the more diffuse emissions associated with other industrial processes...
+        
         emissieoorzaakgroepen = [
             ['delfstoffen', [2]],
             ['voed', [3, 4, 5, 6, 7, 8, 9, 10]],
@@ -165,7 +177,7 @@ class Pointsource_input_preparation:
             ['gas', [57]],
             ['avi', [59]],
             ['bouw', [62]],
-            ['remaining', []]
+            ['remaining', []]    
         ]
 
         remaining_idxs = list(range(len(df.EMISSIEOORZAAK.unique())))
@@ -183,36 +195,36 @@ class Pointsource_input_preparation:
             df_selection = df[
                 (df['EMISSIEOORZAAKLABEL'].isin(list(igroep[1])))
                 & (df['EMISSIE'] > 0)
+                & (df['TYPE'] == 'P') #We consider only point sources here, I suppose, since in area emissions, to get residuals we substract only emissions with P-type, i.g., point sources...
                 ]
 
             if igroep[0] != 'remaining':
+                
+                # Concatenate df_selection with df_selection_non_rem_full:
+                df_selection_non_rem_full = pd.concat([df_selection_non_rem_full, df_selection], ignore_index=True)
+                
+                df_gapfilled = df_selection.copy()
                 # Apply regression to existing values
-                replace_v, replace_t, replace_h = gapfill(
-                    df[
-                        (
-                                df['EMISSIEOORZAAKLABEL'].isin(list(igroep[1]))
-                                & (df['EMISSIE'] > 0)
-                        )
-                    ]
-                )
+                replace_v, replace_t, replace_h = gapfill(df_gapfilled)
 
                 # Use regression to fill missing values
                 for replace in replace_v:
-                    df.loc[replace[0], 'VOLUMESTROOM'] = replace[1]
+                    df_gapfilled.loc[replace[0], 'VOLUMESTROOM'] = replace[1]
                 for replace in replace_t:
-                    df.loc[replace[0], 'TEMPERATUUR'] = replace[1]
+                    df_gapfilled.loc[replace[0], 'TEMPERATUUR'] = replace[1]
                 for replace in replace_h:
-                    df.loc[replace[0], 'HOOGTE'] = replace[1]
+                    df_gapfilled.loc[replace[0], 'HOOGTE'] = replace[1]
 
                 n_replaced_v += len(replace_v)
                 n_replaced_t += len(replace_t)
                 n_replaced_h += len(replace_h)
-                df_test = df[
-                    (
-                            df['EMISSIEOORZAAKLABEL'].isin(list(igroep[1]))
-                            & (df['EMISSIE'] > 0)
-                    )
-                ]
+                
+                # Assign df_gapfilled to df_test
+                df_test = df_gapfilled.copy()
+                
+       
+                # Concatenate df_selection with df_gapfilled_full:
+                df_gapfilled_full = pd.concat([df_gapfilled_full, df_gapfilled], ignore_index=True)
 
                 if self.DoPlot:
                     fig, ax = plt.subplots(1, 3, figsize=(10, 6))
@@ -238,17 +250,47 @@ class Pointsource_input_preparation:
                     fig.suptitle(igroep[0])
                     plt.show()
             else:
-                df_selection.to_csv(
-                    self.targetdir + 'point_source_unassigned.csv', index=False
-                )
+                
+                #NOTE: in some of remaining emissions (with P-type) there are still values of 
+                #VOLUMESTROOM, TEMPERATUUR, HOOGTE, and EMISSIE which all >0, 
+                #but since they are in remaining groups they are filltered out above. 
+                #In my perspective they should be added:
+                
+                #Check if in 'remaining', there are point sources which have all conditions to be included
+                #in df_gapfilled_full, since they have no gaps:
+                
+                df_points_also_to_include = df_selection[
+                        (df_selection['VOLUMESTROOM'] > 0) &
+                        (df_selection['TEMPERATUUR'] > 0) &
+                        (df_selection['HOOGTE'] > 0) &
+                        (df_selection['EMISSIE'] > 0)].copy()  # Create a copy of the DataFrame
+                
+                  
+                #Concatenate df_selection with df_gapfilled_full:
+                df_gapfilled_full = pd.concat([df_gapfilled_full, df_points_also_to_include], ignore_index=True)
+                
+                #Remove the selected rows from df_selection:
+                df_selection = df_selection.drop(df_points_also_to_include.index)
+             
+                #Concatenate df_selection with df_selection_rem_full:    
+                df_selection_rem_full = pd.concat([df_selection_rem_full, df_selection], ignore_index=True)
+                
 
+                
+                #save to point_source_unassigned only those which will be not used in point sources to add them to area emiss:
+                df_selection_rem_full.to_csv(self.targetdir + 'point_source_unassigned.csv', index=False)
+        
+        
         print(
             f'Filled values, Volumestroom:{n_replaced_v}, Temperatuur:{n_replaced_t}, Hoogte:{n_replaced_h}'
         )
+        
 
-        return df
 
-    def plot_emission_data(self, df, df_orig):
+        return df_selection_non_rem_full, df_gapfilled_full
+    
+
+    def plot_emission_data(self, df, df_orig): #use here df_selection_non_rem_full, df_gapfilled_full
         # Code for plotting emission data
         fig, ax = plt.subplots(1, 3, figsize=(12, 6))
         plotvars = ['VOLUMESTROOM', 'TEMPERATUUR', 'HOOGTE']
@@ -267,7 +309,8 @@ class Pointsource_input_preparation:
 
         plt.show()
 
-    #Prepare final model input [per hour] for each hour of simulaiton period:
+        
+        #Prepare final model input [per hour] for each hour of simulaiton period:
 
     def prepare_final_input(self, df):
         #A loop over time to create emissions for each hour of simulation period per block:
@@ -276,7 +319,9 @@ class Pointsource_input_preparation:
         print(f"Point sources input ncdf files are preparing...")
 
         time_array = self.prepare_time_array()   #get time_array
-
+                
+        
+        
         for timepoint in range(self.hour_start, time_array.size, 1):
             year = time_array[timepoint].year
             month = time_array[timepoint].month
@@ -350,5 +395,6 @@ class Pointsource_input_preparation:
 if __name__ == "__main__":
     PSEP = Pointsource_input_preparation()
     df, df_org = PSEP.identify_emission_categories()
-    df_gapfilled = PSEP.prepare_emission_data(df)
-    PSEP.prepare_final_input(df_gapfilled)
+    df_selection_non_rem_full, df_gapfilled_full = PSEP.prepare_emission_data(df)
+    #PSEP.plot_emission_data(df_selection_non_rem_full, df_gapfilled_full)
+    PSEP.prepare_final_input(df_gapfilled_full)

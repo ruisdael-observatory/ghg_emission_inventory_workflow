@@ -20,16 +20,15 @@ WOONPLAATS, XCOORD, YCOORD, SBI_CODE, SBI, DOELGROEP, SUBDOELGROEP,
 CODE_EMISSIEOORZAAK, EMISSIEOORZAAK, COMPARTIMENT, STOFCODE,
 STOF, EENHEID, 2015, 2017, 2018, delimited by a semicolon (;).
 
-private_data_points: This file includes columns like DATASET,
+point_source_rd_file: This file includes columns like DATASET,
 EMISSIEJAAR, STOF, CODE_EMISSIEOORZAAK, EMISSIEOORZAAK, CODE_BEDRIJF,
 NAAM_BEDRIJF, XCO_BEDRIJF, YCO_BEDRIJF, EMISSIEPUNT_CODE,
 EMISSIEPUNT_NAAM, XCO_EMISSIEPUNT, YCO_EMISSIEPUNT,
 TYPE, HOOGTE, LENGTE, BREEDTE, HOEK, UITSTROOMOPENING_M2,
 TEMPERATUUR, UITTREEDSNELHEID, VOLUMESTROOM, WARMTEINHOUD,
-EMISSIE, EENHEID, XCO_EMISSIEPUNT_HARM, YCO_EMISSIEPUNT_HARM,
-XCO_BEDRIJF_HARM, YCO_BEDRIJF_HARM, delimited by a comma (,).
+EMISSIE, EENHEID, delimited by a comma (,).
 
-(in general, private_data_points might include all open_source_data_points, but check this)
+(in general, point_source_rd_file might include all open_source_data_points, but check this)
 
 mapped_data: This file contains columns such as DATASET,
 GEBIEDSINDELING, CODE_GEBIED, GEBIED, DOELGROEP, SUBDOELGROEP,
@@ -41,7 +40,7 @@ segregated per SNAP category, e.g., co2_2017_SNAP_1_residual.csv.
 Notably, for SNAP2, the resolution is 100m, while for other categories, it's 1000m.
 
 Creator Information:
-Creators: Dr. Arseni Doyennel
+Creators: Dr. Marko de Bruine, Dr. Arseni Doyennel
 Email: a.doyennel@vu.nl
 """
 import numpy as np
@@ -57,11 +56,15 @@ import shutil
 from numpy.lib.stride_tricks import as_strided
 from emission_construction_functions import *
 import sys
+import pyproj as pyproj
+from pyproj import Proj, transform
+from pyproj import Transformer
+
 
 sys.path.insert(1, os.path.join(os.path.dirname(os.getcwd()), ''))
 from emission_preparation_setting import (
     year, spec_name, year_start, snaplist, open_source_data_points,
-    private_data_points, mapped_data,
+    mapped_data,
     point_source_rd_file, datadir_ruisdael_area_residuals,
     rundir_ruisdael_area_residuals, cbs_loc_consu_preprocessing
 )
@@ -96,6 +99,10 @@ class Emission_initial_process_get_residuals:
 
         #################################################################
 
+        
+        
+        
+        
     def read_point(self):
         df_point = pd.read_csv(self.datadir + open_source_data_points, delimiter=';')
         df_point_private = pd.read_csv(self.datadir + point_source_rd_file, delimiter=';', decimal=",",
@@ -123,7 +130,7 @@ class Emission_initial_process_get_residuals:
             df_point.loc[index, 'XCO_EMISSIEPUNT'] = row['XCO_BEDRIJF']
             df_point.loc[index, 'YCO_EMISSIEPUNT'] = row['YCO_BEDRIJF']
 
-        return df_point, df_point_private
+        return df_point
 
     def process_row(self, index, row, df_point, df_point_private):
         df_hit = df_point[df_point['NIC'] == row['CODE_BEDRIJF']]
@@ -140,7 +147,50 @@ class Emission_initial_process_get_residuals:
 
         return df_point, df_point_private
 
-    def substract_point_from_map(self, df_point, df_point_private):
+    
+    def save_points_harm(self, df_point):
+        
+        proj_RD   = pyproj.Proj('+proj=sterea +lat_0=52.15616055555555 +lon_0=5.38763888888889 +k=0.9999079 +x_0=155000 +y_0=463000 +ellps=bessel +towgs84=565.417,50.3319,465.552,-0.398957,0.343988,-1.8774,4.0725 +units=m +no_defs')
+        proj_HARM = pyproj.Proj('+proj=lcc +lat_1=52.500000 +lat_2=52.500000 +lat_0=52.500000 +lon_0=.000000 +k_0=1.0 +x_0=649536.512574 +y_0=1032883.739533 +a=6371220.000000 +b=6371220.000000')
+        
+        df_point_P = df_point[(df_point['TYPE'] == 'P')].copy()  # Create a copy of the DataFrame with P-type emis only
+        
+        idx_x_emiss=df_point_P.columns.get_loc("XCO_EMISSIEPUNT")
+        idx_y_emiss=df_point_P.columns.get_loc("YCO_EMISSIEPUNT")
+
+        
+        ff=df_point_P.to_numpy()
+        x_emiss=ff[:,idx_x_emiss]
+        y_emiss=ff[:,idx_y_emiss]
+        
+        xemissHARM=np.zeros(np.size(x_emiss))
+        yemissHARM=np.zeros(np.size(y_emiss))
+        
+        for j in range(0,np.size(x_emiss)):    
+    
+            transformer = Transformer.from_proj(proj_RD, proj_HARM)
+            xemissHARM[j], yemissHARM[j] = transformer.transform(x_emiss[j], y_emiss[j])
+        
+        
+        xemissHARM = xemissHARM.tolist()
+        yemissHARM = yemissHARM.tolist()
+        
+        # Using '' as the column name
+        # and equating it to the list
+        df_point_P['XCO_EMISSIEPUNT_HARM'] = xemissHARM
+        df_point_P['YCO_EMISSIEPUNT_HARM'] = yemissHARM
+        
+        # Assuming self.targetdir contains the directory where you want to save the CSV file
+        csv_file_path = os.path.join(self.datadir, f'ERI_{self.spec_name}_{self.year}_metemk_harm_P_only.csv')
+        
+        for f in glob.glob(csv_file_path):
+            os.remove(f)
+
+        # Save df_point_P to CSV
+        df_point_P.to_csv(csv_file_path, index=False)
+    
+    
+    def substract_point_from_map(self, df_point):
 
         print('substract of point source from area emission processing...')
 
@@ -293,7 +343,7 @@ class Emission_initial_process_get_residuals:
                 os.remove(f)
 
         data = gpd.read_file(os.path.join(self.cbs_dir, self.cbs_name),
-                             include_fields=["crs28992res100m", "aantal_inwoners", "gemiddeld_gasverbruik_woning","gemiddeld_elektriciteitsverbruik_woning", "geometry"])
+                             include_fields=["crs28992res100m", "aantal_inwoners", "geometry"])
 
         # Your data processing code
         aantal_inwoners = data[["aantal_inwoners"]]
@@ -363,8 +413,9 @@ if __name__ == "__main__":
     # Instantiate the class and call the methods:
     emission_init_prep = Emission_initial_process_get_residuals()
     df_point, df_point_private = emission_init_prep.read_point()
-    df_point_2, df_point_private_2 = emission_init_prep.preprocess_point_data(df_point, df_point_private)
-    field_source, df_map, x, y = emission_init_prep.substract_point_from_map(df_point_2, df_point_private_2)
+    df_point_2 = emission_init_prep.preprocess_point_data(df_point, df_point_private)
+    emission_init_prep.save_points_harm(df_point_2)
+    field_source, df_map, x, y = emission_init_prep.substract_point_from_map(df_point_2)
     field_subdoelgroep_source_roads = emission_init_prep.populate_road_emissions(df_map, x, y)
     emission_init_prep.save_data(field_source, field_subdoelgroep_source_roads, x, y)
     emission_init_prep.refine_and_save_snap2_data(field_source)
