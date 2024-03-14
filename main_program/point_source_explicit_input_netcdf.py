@@ -253,8 +253,8 @@ class Pointsource_input_preparation:
                 
                 #NOTE: in some of remaining emissions (with P-type) there are still values of 
                 #VOLUMESTROOM, TEMPERATUUR, HOOGTE, and EMISSIE which all >0, 
-                #but since they are in remaining groups they are filltered out above. 
-                #In my perspective they should be added:
+                #but since they are in remaining groups they are filtered out above. 
+                #In my perspective, they should be added:
                 
                 #Check if in 'remaining', there are point sources which have all conditions to be included
                 #in df_gapfilled_full, since they have no gaps:
