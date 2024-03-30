@@ -72,10 +72,7 @@ outputdir_main_ruisdael_area_csv2netc=os.path.join(os.path.dirname(os.getcwd()),
 targetdir_ruisdael_area_total_static=os.path.join(outputdir_main_ruisdael_area_csv2netc,'3D_static_emiss/') 
 
 #folders location in create_hourly_emissions_3D:
-rundir_create_hourly_emissions_3D =targetdir_ruisdael_area_total_static
-os.path.join(os.path.dirname(os.path.dirname(os.getcwd())),f'{outputdir_main_ruisdael_area_csv2netc}DALES_input_area_emissions_final/')
-
-
+output_dir_create_hourly_emissions_3D=os.path.join(outputdir_main_ruisdael_area_csv2netc,'DALES_input_area_emissions_final/')
 
 #################################################################################
 
