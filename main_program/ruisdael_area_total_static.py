@@ -156,7 +156,7 @@ class Emission_3Dfield_creation:
                                             mode='add',
                                             dim=2,
                                             xloc='XCO_EMISSIEPUNT_HARM',
-                                            yloc='XCO_EMISSIEPUNT_HARM')
+                                            yloc='YCO_EMISSIEPUNT_HARM')
                                
 
 
@@ -174,7 +174,7 @@ class Emission_3Dfield_creation:
                                         mode='add',
                                         dim=2,
                                         xloc='XCO_EMISSIEPUNT_HARM',
-                                        yloc='XCO_EMISSIEPUNT_HARM')
+                                        yloc='YCO_EMISSIEPUNT_HARM')
                
                   
 
