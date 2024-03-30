@@ -373,7 +373,7 @@ class Emission_initial_process_get_residuals:
             data_selected[xidx, yidx, 0] = data['aantal_inwoners'][i]
 
         inwoners_100_100 = data_selected[..., 0].copy()
-        inwoners_100_100[inwoners_100_100 < 0] = 1.
+        inwoners_100_100[inwoners_100_100 < 0] = 0.
 
         inwoners_1k_1k = shrink(inwoners_100_100, len(x) // 10, len(y) // 10)
         inwoners_1k_100 = tile_array(inwoners_1k_1k, 10, 10)
