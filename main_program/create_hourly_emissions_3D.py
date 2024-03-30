@@ -26,8 +26,7 @@ import os
 import pandas as pd
 
 import sys
-from emission_preparation_setting import (rundir_create_hourly_emissions_3D,
-                                          targetdir_ruisdael_area_total_static,
+from emission_preparation_setting import (targetdir_ruisdael_area_total_static,
                                           output_dir_create_hourly_emissions_3D, spec_name, xres, yres,
                                           xn, yn, snaplist, x0, y0, zmax, year_start,
                                           month_start, day_start, hour_start, year_end,
@@ -38,7 +37,6 @@ from emission_preparation_setting import (rundir_create_hourly_emissions_3D,
 #self.setting = EmissionPreparationSettings()
 class Final_3D_input:
     def __init__(self):
-        self.rundir = rundir_create_hourly_emissions_3D
         self.targetdir = targetdir_ruisdael_area_total_static
         self.output_dir = output_dir_create_hourly_emissions_3D
         self.spec_name = spec_name
