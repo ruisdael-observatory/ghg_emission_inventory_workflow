@@ -132,7 +132,7 @@ class Emission_3Dfield_creation:
             # --- fill all remaining NaNs with zero before continue, since DALES does not accept nans in input----
             speci = np.nan_to_num(speci)
             
-            df_all_chunk = None
+            df_all_chunk = pd.DataFrame()
             
             if self.point_source_refinement:
                 print('The refinement of area emiss using point sources is processing.... ')
@@ -147,14 +147,16 @@ class Emission_3Dfield_creation:
                     if snap_cat == isnap:
                         
                         df_all_chunk = pd.concat([df_all_chunk, df_all[df_all['EMISSIEOORZAAK'] == item]], ignore_index=True)
+                        
                 
-                        #Add point sources, which were substracted to get area residuals:
-                        join_map_points(df_all_chunk, speci,
-                                                x, y,
-                                                mode='add',
-                                                dim=2,
-                                                xloc='XCO_EMISSIEPUNT_HARM',
-                                                yloc='XCO_EMISSIEPUNT_HARM')
+                #Add point sources, which were early substracted, to refine area residuals:
+                if not df_all_chunk.empty:
+                    join_map_points(df_all_chunk, speci,
+                                            x, y,
+                                            mode='add',
+                                            dim=2,
+                                            xloc='XCO_EMISSIEPUNT_HARM',
+                                            yloc='XCO_EMISSIEPUNT_HARM')
                                
 
 
