@@ -88,6 +88,13 @@ class AreaEmissionsReprojection_Traffic:
                                  feature in src]
 
         road_network = gpd.GeoDataFrame.from_features(filtered_features)
+        
+        # Add a new column 'TVtot_N_sum' containing the sum of 'LVtot_N', 'MVtot_N', and 'ZVtot_N'
+        road_network['TVtot_N_sum'] = road_network[['LVtot_N', 'MVtot_N', 'ZVtot_N']].sum(axis=1)
+        
+        # Multiply the TVtot_N_sum column by 1000 to convert from g/year to kg/year:
+        road_network['TVtot_N_sum'] = road_network['TVtot_N_sum'] * 1000
+        
         road_network.crs = 'EPSG:28992'
         road_network = road_network.to_crs(self.proj_HARM)
 
@@ -186,7 +193,7 @@ class AreaEmissionsReprojection_Traffic:
                 intersection_gdf = intersection_gdf.rename(columns={'left': 'H_left'})
 
                 # Select only the desired columns
-                selected_columns = ['Shape_Length', 'LVtot_N', 'MVtot_N', 'ZVtot_N', 'H_left', 'geometry']
+                selected_columns = ['Shape_Length', 'TVtot_N_sum', 'geometry']
                 intersection_gdf = intersection_gdf[selected_columns]
 
                 # Convert the geometry back to EPSG:28992
@@ -235,7 +242,7 @@ class AreaEmissionsReprojection_Traffic:
                     # Perform the intersection between road_int_1 and emis
 
                     road_int_2 = gpd.overlay(
-                        intersection_gdf[['Shape_Length', 'LVtot_N', 'MVtot_N', 'ZVtot_N', 'H_left', 'geometry']],
+                        intersection_gdf[['Shape_Length', 'TVtot_N_sum', 'H_left', 'geometry']],
                         # Select relevant columns from 'road_int_1'
                         emis_gdf[['left', 'right', 'top', 'bottom', 'geometry']],
                         how='intersection',
@@ -243,7 +250,7 @@ class AreaEmissionsReprojection_Traffic:
                     )
 
                     weight = (road_int_2.geometry.length / road_int_2['Shape_Length']) * (
-                                road_int_2['LVtot_N'] + road_int_2['MVtot_N'] + road_int_2['ZVtot_N'])
+                                road_int_2['TVtot_N_sum'])
 
                     # Assign the weight to a new column
                     road_int_2['weight'] = weight
@@ -257,7 +264,7 @@ class AreaEmissionsReprojection_Traffic:
 
 
                         # Save the final road_int_2 with specified columns
-                        selected_columns = ['Shape_Length', 'LVtot_N', 'MVtot_N', 'ZVtot_N', 'RD_left', 'weight',
+                        selected_columns = ['Shape_Length', 'TVtot_N_sum', 'RD_left', 'weight',
                                         'geometry']
                         road_int_2 = road_int_2[selected_columns]
                         road_int_2.to_file(rundir + 'road_int_2_' + extname + '.gpkg', driver='GPKG')

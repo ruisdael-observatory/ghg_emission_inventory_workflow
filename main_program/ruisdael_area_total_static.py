@@ -56,16 +56,6 @@ class Emission_3Dfield_creation:
                                     # emiss will be devided right in the model code !
                                     #TODO: now, emiss are equally destributed between vertical layers until plume rise height, but in the nature in some layers plume contribution could be higher...
 
-
-
-        if not os.path.exists(self.targetdir):
-            # Create a new directory because it does not exist:
-            os.makedirs(self.targetdir)
-            print(f'The {self.targetdir} directory is created!')
-        else:
-            print(f'The {self.targetdir} directory exists!')
-            for f in glob.glob(self.targetdir + '*.nc'):
-                os.remove(f)
                 
 
     def process_emissions(self):
@@ -76,10 +66,11 @@ class Emission_3Dfield_creation:
         else:
             df_all = pd.read_csv(self.input_points + point_file_harm_p_only, delimiter=',', decimal=".", encoding="ISO-8859-1")
             
-            
-            
+         
         
         for isnap in self.snaplist:
+            
+            
             if isnap == 1:
                 icatname = 'power'
             elif isnap == 2:
@@ -106,6 +97,20 @@ class Emission_3Dfield_creation:
                 if isnap == 6:
                     print('SNAP category 6 (SOLVENT USE) not to be processed.')
                 continue
+                
+                
+                
+                
+            if not os.path.exists(self.targetdir):
+                # Create a new directory because it does not exist:
+                os.makedirs(self.targetdir)
+                print(f'The {self.targetdir} directory is created!')
+            else:
+                print(f'The {self.targetdir} directory exists!')
+                for f in glob.glob(self.targetdir + f'{self.spec_name}_{self.year}_{isnap}_{icatname}.nc'):
+                    os.remove(f)
+            
+            
 
             # --- 1 --- 2D file
 

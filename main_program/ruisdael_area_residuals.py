@@ -37,7 +37,7 @@ COMPARTIMENT, STOFCODE, STOF, EENHEID, EMISSIE_KG, delimited by a semicolon (;).
 Output:
 This script generates CSV files with residual area emissions,
 segregated per SNAP category, e.g., co2_2017_SNAP_1_residual.csv.
-Notably, for SNAP2, the resolution is 100m, while for other categories, it's 1000m.
+Notably, for SNAP2, the resolution is 100m, while for other categories is 1000m.
 
 Creator Information:
 Creators: Dr. Marko de Bruine, Dr. Arseni Doyennel
@@ -323,7 +323,7 @@ class Emission_initial_process_get_residuals:
     ##################################################################
 
     # This method is used to refine residual area emission for
-    # the SNAP 2 category (consummenten) category using household data (CBS files)
+    # the SNAP 2 category (consummenten) category using household statistical data (CBS files)
     # and saving the data into apropriate csv-file for further reprojection and reasignment to HARM grid.
     # Note: cbs_vk100_....gpkg can be downloaded from:
     # https://www.cbs.nl/nl-nl/dossier/nederland-regionaal/geografische-data/kaart-van-100-meter-bij-100-meter-met-statistieken
@@ -343,10 +343,11 @@ class Emission_initial_process_get_residuals:
                 os.remove(f)
 
         data = gpd.read_file(os.path.join(self.cbs_dir, self.cbs_name),
-                             include_fields=["crs28992res100m", "aantal_inwoners", "geometry"])
+                             include_fields=["crs28992res100m","aantal_inwoners", "gemiddeld_gasverbruik_woning","gemiddeld_elektriciteitsverbruik_woning",  "geometry"])
 
-        # Your data processing code
-        aantal_inwoners = data[["aantal_inwoners"]]
+        # Use 'gemiddeld_gasverbruik_woning' primarily, fall back to 'aantal_inwoners' if missing
+        gasverbruik = data["gemiddeld_gasverbruik_woning"].fillna(0)
+        aantal_inwoners = data["aantal_inwoners"].fillna(0)
         data2 = data['geometry']
 
         coordpolygonX = np.zeros(np.size(data2))
@@ -358,8 +359,8 @@ class Emission_initial_process_get_residuals:
             coordpolygonX[i] = np.round(a[0, 3])
             coordpolygonY[i] = np.round(a[1, 3])
 
-        x_start, x_end, dx = self.x_start, self.x_end, 100 #dx is 100 becauee CRS data are 100x100m
-        y_start, y_end, dy = self.y_start, self.y_end, 100 #dy is 100 becauee CRS data are 100x100m
+        x_start, x_end, dx = self.x_start, self.x_end, 100 #dx is 100 because CRS data are 100x100m
+        y_start, y_end, dy = self.y_start, self.y_end, 100 #dy is 100 because CRS data are 100x100m
 
         x = np.arange(x_start, x_end, dx).astype(float)
         y = np.arange(y_start, y_end, dy).astype(float)
@@ -370,7 +371,12 @@ class Emission_initial_process_get_residuals:
             x_shape, y_shape = coordpolygonX[i], coordpolygonY[i]
             xidx = np.argmax(x >= x_shape) - 1
             yidx = np.argmax(y >= y_shape) - 1
-            data_selected[xidx, yidx, 0] = data['aantal_inwoners'][i]
+            
+            # Prioritize gasverbruik but fall back to aantal_inwoners if gasverbruik is zero:
+            if gasverbruik[i] > 0:
+                data_selected[xidx, yidx, 0] = gasverbruik[i]
+            else:
+                data_selected[xidx, yidx, 0] = aantal_inwoners[i]
 
         inwoners_100_100 = data_selected[..., 0].copy()
         inwoners_100_100[inwoners_100_100 < 0] = 0.

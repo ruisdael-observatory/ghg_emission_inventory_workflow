@@ -70,11 +70,12 @@ class Pointsource_input_preparation:
         self.DoPlot = True
         self.DoVerbose = True
         self.DoWrite = True
-        # === Regression
+        # === Regression (parameters in function gapfill (see function script)):
         self.t_order = 0
         self.v_order = 1
         self.h_order = 1
         self.h_shape = 'log'
+        
 
 
     def create_target_directory(self):
@@ -373,6 +374,8 @@ class Pointsource_input_preparation:
                                     * tprof_week[isnap, iweek]
                                     * tprof_mnth[isnap, imonth]
                             )
+                            
+                        data
 
                         data2netc(
                             data,
