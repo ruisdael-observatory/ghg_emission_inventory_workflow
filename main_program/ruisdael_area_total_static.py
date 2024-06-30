@@ -80,9 +80,10 @@ class Emission_3Dfield_creation:
             elif isnap == 4:
                 icatname = 'industrial_processes'
             elif isnap == 5:
-                print(self.datadir + f'SNAP category {isnap} has no vertical component (yet): emission from first model level only')
                 icatname = 'fossil_fuels'
+                print(self.datadir + f'SNAP category {isnap} has no vertical component (yet): emission from first model level only')
             elif isnap == 7:
+                print(self.datadir + f'SNAP category {isnap} has no vertical component (yet): emission from first model level only')
                 icatname = 'road'
             elif isnap == 8:
                 print(self.datadir + f'SNAP category {isnap} has no vertical component (yet): emission from first model level only')
@@ -200,7 +201,7 @@ class Emission_3Dfield_creation:
             var_y[:] = np.array(y)
             var_z[:] = np.array(z)
 
-            if isnap in [5, 8, 10]:
+            if isnap in [5, 7, 8, 10]:
                 var_e[:, :, :] = speci.T * 0 #do not need to devide by number of layers, since here all emiss are at first layer
                 var_e[0, :, :] = speci.T
             else:
