@@ -6,9 +6,9 @@ Additionally, it incorporates the following functionalities:
 
 Refinement of area emissions using point source data (if point sources are not utilized as explicit input).
 Generation of 3-D emission files per SNAP category to facilitate the final preparation of area emission inputs.
-( area emission are devided by number of vertical layers, covered with plume until the plume rise height layer!)
-On vertical placement of emissions: currently, the vertical placement of area emissions 
-is based on results presented in Brunner et al. (2019) [https://acp.copernicus.org/articles/19/4541/2019/].
+( area emission are devided by number of vertical layers, covered with plume until the emission top height layer!)
+On vertical allocation of emissions: currently, the vertical allocation of area emissions 
+is based on results presented in Brunner et al. (2019) (but applying even destribution, yet) [https://acp.copernicus.org/articles/19/4541/2019/].
 
 Author: Dr. Arseni Doyennel
 Contact Email: a.doyennel@vu.nl
@@ -46,15 +46,15 @@ class Emission_3Dfield_creation:
         self.crs = 'HARM'
         # refinement using point sourse (alrernative method: they can be used explicitly as DALES input (see point_souce folder....)
         self.point_source_refinement = False
-        self.layer_num_emiss_z = 9  #IMPORTANT parameter: if SNAP has z component, emiss will be placed at some number of model layers (depends on zmax) from the bottom to the stack height
-                                    #currently, the plume rise height is set as 200m, so emiss should be devided by number of vertical layers
+        self.layer_num_emiss_z = 6  #IMPORTANT parameter: if SNAP category has vertical component, emiss will be placed at some number of model layers (depends on zmax) from the emission bottom to the emission top
+                                    #currently, the plume top height is set as ~150m, so emiss should be devided by number of vertical layers from the fround to 150m
                                     # where emiss will be placed, to make equal destribution and observe the mass conservation.
-                                    # If you change emiss plume rise height, check the layers and change this number!
+                                    # If you change emiss top height, check the layers and change this number!
                                     #NOTE: for point sources, if you use explicit input method,
-                                    # plume rise height is calculated from stack height, interactively and preliminary
-                                    # the number of vertical layers, covered with plume, is unkown and
-                                    # emiss will be devided right in the model code !
-                                    #TODO: now, emiss are equally destributed between vertical layers until plume rise height, but in the nature in some layers plume contribution could be higher...
+                                    # plume rise height is calculated from stack height interactively; preliminary
+                                    # the number of vertical layers, where emissions are allocated, is unkown and
+                                    # the emiss will be destributed directly in the model code !
+                                    #TODO: now, emiss are equally destributed between vertical layers until plume top height, but in the nature in some layers plume contribution could be higher...
 
                 
 
@@ -205,7 +205,7 @@ class Emission_3Dfield_creation:
                 var_e[:, :, :] = speci.T * 0 #do not need to devide by number of layers, since here all emiss are at first layer
                 var_e[0, :, :] = speci.T
             else:
-                var_e[:, :, :] = speci.T/self.layer_num_emiss_z   #devide by number of vertical layers, where emiss are placed (check model layers +1)
+                var_e[:, :, :] = speci.T/self.layer_num_emiss_z   #devide by number of vertical layers, where emiss are alocated (check model layers +1)
 
             if self.crs == 'RD':
                 var_x.units = 'Rijksdriehoekcoordinaat x in meters'

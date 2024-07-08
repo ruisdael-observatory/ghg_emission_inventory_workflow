@@ -22,12 +22,12 @@ year = 2017   #year for which emissions will be used from
 
 year_start = 2018   #can be different from the "year", since here it is a simulation period setting
 month_start = 6
-day_start = 20
+day_start = 25
 hour_start = 0
 
 year_end = 2018
 month_end = 6
-day_end = 26
+day_end = 29
 hour_end = 6
 
 
@@ -93,8 +93,8 @@ xres = 156.25  #from namoptions (experiment setting)
 yres = 156.25  #from namoptions (experiment setting)
 
 
-zmax=200 #the vertical height of emissions in meters (emission plume rise high for area emission) 
-#(the rounded height of "kemis" vertical grid point from namoptions) why 200m? ->
+zmax=142 #the vertical top of emissions in meters (emission plume rise high for area emission) 
+#(the rounded height of "kemis" vertical grid point from namoptions) why 142m? ->
 #see https://acp.copernicus.org/articles/19/4541/2019/ fig. 2 this could be tuned, I guess
 
 
