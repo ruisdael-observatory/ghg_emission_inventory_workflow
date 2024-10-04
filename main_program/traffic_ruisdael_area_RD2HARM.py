@@ -193,7 +193,7 @@ class AreaEmissionsReprojection_Traffic:
                 intersection_gdf = intersection_gdf.rename(columns={'left': 'H_left'})
 
                 # Select only the desired columns
-                selected_columns = ['Shape_Length', 'TVtot_N_sum', 'geometry']
+                selected_columns = ['Shape_Length', 'TVtot_N_sum', 'H_left', 'geometry']
                 intersection_gdf = intersection_gdf[selected_columns]
 
                 # Convert the geometry back to EPSG:28992

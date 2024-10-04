@@ -102,11 +102,18 @@ class Pointsource_input_preparation:
         return time_array
 
     def load_raw_emission_data(self):
+        #return pd.read_csv(
+            #self.datadir + self.pointsourcefile,
+            #delimiter=',',
+            #decimal=".",
+            #encoding="ISO-8859-1",
+        #)
+    
         return pd.read_csv(
             self.datadir + self.pointsourcefile,
-            delimiter=',',
-            decimal=".",
-            encoding="ISO-8859-1",
+            delimiter=';', 
+            low_memory=False
+            
         )
 
 
@@ -159,8 +166,9 @@ class Pointsource_input_preparation:
         #are originate from specific sources like chimneys, exhaust stacks, or vents, 
         #making them distinct from the more diffuse emissions associated with other industrial processes...
         
+        #Commented emissieoorzaakgroepen are for the year 2018 (in other years, they may change)...
         emissieoorzaakgroepen = [
-            ['delfstoffen', [2]],
+            #['delfstoffen', [2]],
             ['voed', [3, 4, 5, 6, 7, 8, 9, 10]],
             ['papier', [13, 14, 15]],
             ['olie', [16]],
@@ -168,10 +176,10 @@ class Pointsource_input_preparation:
             ['verf', [25]],
             ['kunststof', [33]],
             ['glas/keramiek', [34, 35, 36]],
-            ['bakstenen', [37]],
+            #['bakstenen', [37]],
             ['metaal', [40, 41, 42, 43, 44, 45, 46]],
             ['gieten', [47]],
-            ['metaal_prod', [48]],
+            #['metaal_prod', [48]],
             ['elektro', [49]],
             ['scheepsbouw', [53]],
             ['elektriciteit', [55, 56]],
@@ -288,7 +296,7 @@ class Pointsource_input_preparation:
         
 
 
-        return df_selection_non_rem_full, df_gapfilled_full
+        return df_selection_rem_full, df_gapfilled_full
     
 
     def plot_emission_data(self, df, df_orig): #use here df_selection_non_rem_full, df_gapfilled_full
@@ -398,6 +406,6 @@ class Pointsource_input_preparation:
 if __name__ == "__main__":
     PSEP = Pointsource_input_preparation()
     df, df_org = PSEP.identify_emission_categories()
-    df_selection_non_rem_full, df_gapfilled_full = PSEP.prepare_emission_data(df)
+    df_selection_rem_full, df_gapfilled_full = PSEP.prepare_emission_data(df)
     #PSEP.plot_emission_data(df_selection_non_rem_full, df_gapfilled_full)
     PSEP.prepare_final_input(df_gapfilled_full)

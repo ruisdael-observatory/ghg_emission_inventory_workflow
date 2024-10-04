@@ -44,7 +44,7 @@ class Emission_3Dfield_creation:
         self.input_points_unassign = targetdir_point_source_plume_processing
         self.targetdir = targetdir_ruisdael_area_total_static
         self.crs = 'HARM'
-        # refinement using point sourse (alrernative method: they can be used explicitly as DALES input (see point_souce folder....)
+        # refinement using point source (alrernative method: they can be used explicitly as DALES input (see point_source folder....)
         self.point_source_refinement = False
         self.layer_num_emiss_z = 6  #IMPORTANT parameter: if SNAP category has vertical component, emiss will be placed at some number of model layers (depends on zmax) from the emission bottom to the emission top
                                     #currently, the plume top height is set as ~150m, so emiss should be devided by number of vertical layers from the fround to 150m
@@ -54,7 +54,7 @@ class Emission_3Dfield_creation:
                                     # plume rise height is calculated from stack height interactively; preliminary
                                     # the number of vertical layers, where emissions are allocated, is unkown and
                                     # the emiss will be destributed directly in the model code !
-                                    #TODO: now, emiss are equally destributed between vertical layers until plume top height, but in the nature in some layers plume contribution could be higher...
+                                    #TODO: now, emiss are equally destributed between vertical layers until plume top height, but in the nature, there might be a variability in vertical concentration...
 
                 
 
@@ -85,8 +85,7 @@ class Emission_3Dfield_creation:
             elif isnap == 7:
                 print(self.datadir + f'SNAP category {isnap} has no vertical component (yet): emission from first model level only')
                 icatname = 'road'
-            elif isnap == 8:
-                print(self.datadir + f'SNAP category {isnap} has no vertical component (yet): emission from first model level only')
+            elif isnap == 8: 
                 icatname = 'mobile'
             elif isnap == 9:
                 icatname = 'waste'
@@ -201,7 +200,8 @@ class Emission_3Dfield_creation:
             var_y[:] = np.array(y)
             var_z[:] = np.array(z)
 
-            if isnap in [5, 7, 8, 10]:
+            if isnap in [5, 7, 10]:
+
                 var_e[:, :, :] = speci.T * 0 #do not need to devide by number of layers, since here all emiss are at first layer
                 var_e[0, :, :] = speci.T
             else:
