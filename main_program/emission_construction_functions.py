@@ -12,6 +12,7 @@ def determine_snap(subdoelgroep):
         isnap = 1
         
     elif subdoelgroep in ['Energiegebruik en processen Handel, Diensten en Overheid (HDO)',
+                          'Energiegebruik en processen Handel. Diensten en Overheid (HDO)',
                           'Indirecte emissies broeikasgassen Consumenten',
                           'Productgebruik Consumenten',
                           'Energiegebruik Consumenten',
@@ -35,10 +36,13 @@ def determine_snap(subdoelgroep):
                           'Textiel- en tapijtindustrie',
                           'Basismetaal',
                           'Drinkwaterbedrijven',
-                          'Chemische Industrie bestrijdingsmiddelen']:
+                          'Chemische Industrie bestrijdingsmiddelen',
+                          'Overige processen']:
         isnap = 3
         
-    elif subdoelgroep in ['Raffinage en verwerking']:
+    elif subdoelgroep in ['Raffinage en verwerking',
+                          'Railverkeer', #note:Railverkeer is snap 8, but since we refine it with shipping lines Railverkeer is put here as snap 4 has no refinement
+                          'Mobiele werktuigen']: #note:Mobiele werktuigen is snap 8, but since we refine it with shipping lines Mobiele werktuigen is put here as snap 4 has no refinement
         
         isnap = 4
     
@@ -52,31 +56,42 @@ def determine_snap(subdoelgroep):
                           'Wegverkeer - niet uitlaatgassen']:
         isnap = 7
         
-    elif subdoelgroep in ['Mobiele werktuigen',
+    elif subdoelgroep in [
                           'Binnenscheepvaart',
                           'Zeescheepvaart NCP (inclusief ankerliggers)',
-                          'Luchtvaart',
                           'Zeescheepvaart stilliggend',
                           'Zeescheepvaart varend op Nederlands grondgebied',
-                          'Railverkeer',
-                          'Recreatievaart']:
-        isnap = 8
+                          'Recreatievaart',
+                          'Visserij']:
+        isnap = 8 #only shipping for now
         
     elif subdoelgroep in ['Indirecte emissies broeikasgassen Afvalverwijdering',
                           "AVI's",
                           'Energiegebruik en processen Riolering en waterzuiveringsinstallaties',
                           'Overige afvalbedrijven',
-                          'Storten']:
+                          'Storten',
+                          'Huishoudelijk afvalwater',
+                          'Indirecte emissies broeikasgassen Riolering en waterzuiveringsinstallaties']:
         isnap = 9
         
     elif subdoelgroep in ['Indirecte emissies broeikasgassen Landbouw',
                           'Productgebruik Landbouw',
                           'Energiegebruik Landbouw',
-                          'Visserij',
                           'Landbouwbedrijven',
-                          'Kunstmest']:
+                          'Kunstmest',
+                          'Landbouwhuisdieren - pluimvee',
+                          'Landbouwhuisdieren - overige dieren',
+                          'Landbouwhuisdieren - rundvee',
+                          'Bodems natuur',
+                          'Bodems landbouw',
+                          'Landbouwhuisdieren - varkens',
+                          'Overig drinkwater',
+                          'Composteren',
+                          'Particuliere landbouwactiviteiten']:
         isnap = 10
-        
+    
+    elif subdoelgroep in ['Luchtvaart']:
+        isnap = 11
     else:
         print(f'Unknown subdoelgroep: {subdoelgroep}')
         isnap = 0
@@ -107,16 +122,19 @@ def emissieoorzaak_snap(emissieoorzaak):
  'SBI 10.5 (per bedrijf): Zuivelindustrie',
  'SBI 10.6 (per bedrijf): Meelproduktie (excl. zetmeel)',
  'SBI 10.8 (per bedrijf): Overige voedingsmiddelenindustrie (exclusief SBI 10.81 en 10.82)',
+ 'SBI 10.9 (per bedrijf): Diervoederindustrie',
  'SBI 11.07 (per bedrijf): Vervaardiging van dranken',
  'SBI 13/14 (per bedrijf): Vervaardiging van textiel en kleding',
+ 'SBI 15.11 (per bedrijf): Leerlooierijen en bontbereiding',
  'SBI 16 (per bedrijf): Houtindustrie en vervaardiging van artikelen van hout, kurk, riet en vlechtwerk (geen meubels)',
  'SBI 17 (per bedrijf): Vervaardiging van papier, karton en papier- en kartonwaren',
  'SBI 17.1 (per bedrijf): Vervaardiging van papierpulp, papier en karton',
  'SBI 17.2 (per bedrijf): Vervaardiging van papier- en kartonwaren',
  'SBI 20.1 (per bedrijf): Vervaardiging van chemische basisproducten',
- #'SBI 20.11 (per bedrijf): Vervaardiging van industriÃle gassen',
- 'SBI 20.11 (per bedrijf): Vervaardiging van industriÃ«le gassen',      
-        
+ 'SBI 20.11 (per bedrijf): Vervaardiging van industriÃ«le gassen',
+ 'SBI 20.11 (per bedrijf): Vervaardiging van industriële gassen',
+ 'SBI 20.11 (per bedrijf): Vervaardiging van industriÃle gassen',
+ 'SBI 20.11 (per bedrijf): Vervaardiging van industriÎle gassen',      
  'SBI 20.13 (per bedrijf): Basischemie anorganisch',
  'SBI 20.141 (per bedrijf): Vervaardiging van petrochemische producten',
  'SBI 20.149 (per bedrijf): Basischemie organisch (geen petrochemische producten)',
@@ -155,23 +173,23 @@ def emissieoorzaak_snap(emissieoorzaak):
  'SBI 31/32 (per bedrijf): Vervaardiging van meubels en overige goederen',
  "SBI 45 (per bedrijf): Handel en reparatie van auto's en motorfietsen",  
  'SBI 20.12 (per bedrijf): Vervaardiging van kleur- en verfstoffen', 
- 'SBI 24.2 (per bedrijf): Vervaardiging van stalen buizen en pijpen']
+ 'SBI 24.2 (per bedrijf): Vervaardiging van stalen buizen en pijpen',
+ 'SBI 20.41 (per bedrijf): Vervaardiging van was- en schoonmaakmiddelen',
+ 'SBI 24.3 (per bedrijf): Overige eerste verwerking van ijzer en staal']
     
     emissieoorzaak_snap4 = ['SBI 19.201 (per bedrijf): Aardolieraffinage', 'SBI 15 (per bedrijf): Lederindustrie en bontbereiding', 
                             #'SBI 10.4 (per bedrijf): produktie oliÃn en vetten'
-                           'SBI 10.4 (per bedrijf): produktie oliÃ«n en vetten' ]
+                           'SBI 10.4 (per bedrijf): produktie oliÃ«n en vetten',
+                           'SBI 10.4 (per bedrijf): produktie oliÎn en vetten',
+                           'SBI 10.4 (per bedrijf): produktie oliën en vetten',
+                           'SBI 20.52 (per bedrijf): Vervaardiging van lijm en bereide kleefmiddelen']
     
     emissieoorzaak_snap5 = ['SBI 35.12 (per bedrijf): Transportnet voor aardgas', 
                             'SBI 08 (per bedrijf): Winning van delfstoffen (geen olie en gas)', 
                             'SBI 06/09.1 (per bedrijf): Aardolie- en gaswinning en dienstverlening voor de aardolie- en aardgaswinning']
     
-    emissieoorzaak_snap8 = ['Vliegverkeer, Take Off', 
-                            'Vliegverkeer, Climb Out',
-                            'Vliegverkeer, Approach', 
-                            'Vliegverkeer, Idle',
-                            'Vliegverkeer, APU', 
-                            'Vliegverkeer, GSE',
-                            'SBI 41-43 (per bedrijf): Bouwnijverheid']
+    emissieoorzaak_snap8 = ['SBI 41-43 (per bedrijf): Bouwnijverheid',
+                            'SBI 52.10/52.24 (per bedrijf): Laad-, los- en overslagactiviteiten en opslag']
     
     emissieoorzaak_snap9 = ['SBI 37: Afvalwaterinzameling en -behandeling',
                             "SBI 38.2 (per bedrijf): Afvalinzameling/beh, AVI's",
@@ -181,6 +199,15 @@ def emissieoorzaak_snap(emissieoorzaak):
                             'SBI 37 (per bedrijf): Afvalwaterinzameling en -behandeling']
     
     emissieoorzaak_snap10 = ['SBI 01 (per bedrijf): Landbouw, jacht en dienstverlening voor de landbouw en jacht']
+    
+    emissieoorzaak_snap11 = ['Vliegverkeer, Take Off', 
+                            'Vliegverkeer, Climb Out',
+                            'Vliegverkeer, Approach', 
+                            'Vliegverkeer, Idle',
+                            'Vliegverkeer, APU', 
+                            'Vliegverkeer, GSE']
+    
+
 
     if emissieoorzaak in emissieoorzaak_snap1:
         snap = 1
@@ -198,6 +225,8 @@ def emissieoorzaak_snap(emissieoorzaak):
         snap = 9   
     elif emissieoorzaak in emissieoorzaak_snap10:
         snap = 10
+    elif emissieoorzaak in emissieoorzaak_snap11:
+        snap = 11
     else:
         snap = -1
         print('Unknown emissieoorzaak:', emissieoorzaak)
@@ -260,12 +289,12 @@ def reademisoptions(rundir, show_log=False):
                     runlength  = int(values[0])
 
                 elif keyword == 'xmin':
-                    xmin = int(values[0])
+                    xmin = float(values[0])
                 elif keyword == 'xmax':
                     xmax = float(values[0])
                     
                 elif keyword == 'ymin':
-                    ymin = int(values[0])
+                    ymin = float(values[0])
                 elif keyword == 'ymax':
                     ymax = float(values[0])
                     
@@ -318,7 +347,7 @@ def loadsnap():
     tprof_hour, np.array 10x24
     
     """
-    nsnap = 10
+    nsnap = 11
 
     tprof_mnth = np.zeros([nsnap, 12])
     tprof_week = np.zeros([nsnap, 7])
@@ -380,9 +409,25 @@ def loadsnap():
     tprof_week[9] =  7*[1.]
     tprof_hour[9] = 24*[1.]
     
+    # SNAP 11 - Aviation
+    tprof_mnth[10] = 12*[1.]
+    tprof_week[10] =  7*[1.]
+    tprof_hour[10] = 24*[1.]
+    
     return tprof_hour, tprof_week, tprof_mnth
 
 
+def get_local_time(utc_dt, timezone_name='Europe/Amsterdam'):
+    """
+    Convert UTC datetime to local datetime.
+    """
+    from zoneinfo import ZoneInfo
+    from datetime import timezone
+
+    if utc_dt.tzinfo is None:
+        utc_dt = utc_dt.replace(tzinfo=timezone.utc)
+
+    return utc_dt.astimezone(ZoneInfo(timezone_name))
 
 
 def checkbounds(domainbounds, x, y):
@@ -535,7 +580,7 @@ def writereademission(domainbounds, tstart, tend, tracers, sources, categos, sho
 
 
 
-def writereademission_3d(inputncdir, output_dir, domainbounds, tstart, tend, tracers, sources, categos, show_log=False):
+def writereademission_3d(inputncdir, output_dir, domainbounds, tstart, tend, tracers, sources, categos, tprof_hour, tprof_week, tprof_mnth, author, email, show_log=False):
     import numpy as np
     import netCDF4 as netc
     import os
@@ -562,18 +607,25 @@ def writereademission_3d(inputncdir, output_dir, domainbounds, tstart, tend, tra
     do_proceed = True
     hourly_emis = np.zeros([10, 10])  # dummy
 
-    tprof_hour, tprof_week, tprof_mnth = loadsnap()
+    #tprof_hour, tprof_week, tprof_mnth = loadsnap()
 
     while tstep <= tend and do_proceed:
 
-        efs = tprof_mnth[:, tstep.month - 1] * tprof_week[:, tstep.weekday()] * tprof_hour[:, tstep.hour]
+        utc_t = tstep
+        local_t = get_local_time(utc_t)
+
+        efs = (
+            tprof_mnth[:, local_t.month - 1]
+            * tprof_week[:, local_t.weekday()]
+            * tprof_hour[:, local_t.hour]
+        )
 
         for itrac, tracer in enumerate(tracers):
 
             # Reset for new tracer
             hourly_emis[:] = 0
 
-            tfname = "{}_emis_{}_3d.nc".format(tracer, tstep.strftime("%Y%m%d%H%M"))
+            tfname = "{}_emis_{}_3d.nc".format(tracer, utc_t.strftime("%Y%m%d%H%M"))
             if show_log:
                 print("Target file: ", tfname)
 
@@ -664,8 +716,10 @@ def writereademission_3d(inputncdir, output_dir, domainbounds, tstart, tend, tra
                 tfobj = netc.Dataset(output_dir + tfname, 'w')
 
 
-                t0 = tstep.strftime("%Y-%m-%d %H:%M")
-                t1 = (tstep + dt).strftime("%H:%M")
+                t0 = utc_t.strftime("%Y-%m-%d %H:%M")
+                t1 = (utc_t + dt).strftime("%H:%M")
+
+                
                 dx = float(x[1]-x[0])
                 dy = float(y[1]-y[0])
                 
@@ -674,10 +728,9 @@ def writereademission_3d(inputncdir, output_dir, domainbounds, tstart, tend, tra
                 tfobj.history = "Created: " + datetime.now().strftime("%d %b %Y")
 
                 tfobj.description = f"Total {tracer.upper()} emission from categories {sources}"
-                tfobj.valid = "Valid from " + tstep.strftime("%Y-%m-%d %H:%M") + ' to ' + (tstep + dt).strftime(
-                    "%Y-%m-%d %H:%M")
-                tfobj.author = 'A. Doyennel (VU)'
-                tfobj.email = 'a.doyennel@vu.nl'
+                tfobj.valid = ("Valid from " + utc_t.strftime("%Y-%m-%d %H:%M") + " to " + (utc_t + dt).strftime("%Y-%m-%d %H:%M"))
+                tfobj.author = author
+                tfobj.email = email
 
                 # -- Declaration of dimensions and variables
                 dim_x = tfobj.createDimension('x', nx)
@@ -699,7 +752,8 @@ def writereademission_3d(inputncdir, output_dir, domainbounds, tstart, tend, tra
                 var_x.units = 'Rijksdriehoekcoordinaat x in meters'
                 var_y.units = 'Rijksdriehoekcoordinaat y in meters'
                 var_z.units = 'Hoogte z in meters (middelpunt gridbox)'
-                var_e.units = 'Kilogram ' + tracer.lower() + ' per hour (kg hour-1)'
+                var_e.units = 'kg hour-1'
+                #var_e.units = 'Kilogram ' + tracer.lower() + ' per hour (kg hour-1)'
 
                 tfobj.close()
 
@@ -788,97 +842,160 @@ def load_ERmap(df, field, x, y, year):
     df_5km = df[df['CODE_GEBIED'].str.contains('km5')]
     df_1km = df[df['CODE_GEBIED'].str.contains('km1')]
     
+    def convert_to_float(value):
+        if isinstance(value, str):
+            value = value.replace(',', '.')
+        return float(value)
+    
     if len(df_5km) > 0:
         for index, row in df_5km.iterrows():
+            mapemission = convert_to_float(row['EMISSIE_KG'])
             
-            mapemission = row['EMISSIE_KG']
-            mapemission = float(mapemission.replace(',','.'))
-            
-            xidx = np.argmax(x>=1e3*float(row['CODE_GEBIED'][1:4]))
-            yidx = np.argmax(y>=1e3*float(row['CODE_GEBIED'][5:8]))
-            field[xidx:xidx+5,yidx:yidx+5] += mapemission/25
-            
+            xidx = np.argmax(x >= 1e3 * float(row['CODE_GEBIED'][1:4]))
+            yidx = np.argmax(y >= 1e3 * float(row['CODE_GEBIED'][5:8]))
+            field[xidx:xidx + 5, yidx:yidx + 5] += mapemission / 25
+    
     if len(df_1km) > 0:
         for index, row in df_1km.iterrows():
-            
-            mapemission = row['EMISSIE_KG']
-            mapemission = float(mapemission.replace(',','.'))
+            mapemission = convert_to_float(row['EMISSIE_KG'])
     
-            xidx = np.argmax(x>=1e3*float(row['CODE_GEBIED'][0:3]))
-            yidx = np.argmax(y>=1e3*float(row['CODE_GEBIED'][3:6]))
-            field[xidx,yidx] += mapemission
-            
+            xidx = np.argmax(x >= 1e3 * float(row['CODE_GEBIED'][0:3]))
+            yidx = np.argmax(y >= 1e3 * float(row['CODE_GEBIED'][3:6]))
+            field[xidx, yidx] += mapemission
+
 import numpy as np
 
-def add_subtract(field, point_emis, mode):
-    if mode == 'subtract':
-        point_emis = -point_emis
-    return field + point_emis
+def add_subtract(point_emis, mode):
+    return point_emis if mode == 'add' else  point_emis*0 #-point_emis #(if point sources are not included to area emissions, use point_emis*0 !!!!)
 
-def join_map_points(df, field, x=[], y=[], z=[], mode=None, dim=0, xloc='XCOORD', yloc='YCOORD', zloc='HOOGTE', emisname='EMISSIE'):
-    dx = x[1] - x[0]
-    dy = y[1] - y[0]
-
-    def update_field(ix, iy, iz=None):
-        if dim == 2:
-            field[ix, iy] = add_subtract(field[ix, iy], emis * fracx * fracy, mode=mode)
-        elif dim == 3:
-            field[ix, iy, iz] = add_subtract(field[ix, iy, iz], emis * fracx * fracy, mode=mode)
+def join_map_points(df, field, x=[], y=[], z=[], mode=None, dim=2, xloc='XCOORD', yloc='YCOORD', zloc='HOOGTE', emisname='EMISSIE'):
 
     if mode not in ['add', 'subtract']:
-        print('Invalid mode, use "add" or "subtract"')
-
+        raise ValueError('Invalid mode, use "add" or "subtract"')
     if dim not in [2, 3]:
-        print('Invalid dimension, use 2 or 3')
+        raise ValueError('Invalid dimension, use 2 or 3')
 
+    # -------------------------
+    # CLEAN INPUT
+    # -------------------------
+    df = df.dropna(subset=[xloc, yloc, emisname]).copy()
+
+    n_in = len(df)
+    n_mapped = 0
+    n_skipped = 0
+    grid_updates = 0
+
+    # -------------------------
+    # MAIN LOOP
+    # -------------------------
     for _, row in df.iterrows():
+
+        reason_skipped = None
+
         x_point = float(row[xloc])
         y_point = float(row[yloc])
-        z_point = float(row[zloc])
         emis = float(row[emisname])
 
-        if np.isfinite(emis):
-            if row['TYPE'] == 'P':     #P means point source
-                xidx = np.argmax(x >= x_point) - 1
-                yidx = np.argmax(y >= y_point) - 1
-                if dim == 3: zidx = np.argmax(z >= z_point) - 1
+        # --- emission validity ---
+        if not np.isfinite(emis):
+            n_skipped += 1
+            continue
 
-                if mode == 'add':
-                    if dim == 2: field[xidx, yidx] = add_subtract(field[xidx, yidx], emis, mode=mode)
-                    if dim == 3: field[xidx, yidx, zidx] = add_subtract(field[xidx, yidx, zidx], emis, mode=mode)
-                elif mode == 'subtract':
-                    if dim == 2:
-                        if field[xidx, yidx] * 1.01 < emis * 0.99:
-                            print(f'Warning! point > map value: {row["NAAM_BEDRIJF"]} {row[xloc]},{row[yloc]} {xidx},{yidx} {x[xidx]},{y[yidx]} {x[xidx + 1]},{y[yidx + 1]} {emis:.2e} > {field[xidx, yidx]:.2e}')
-                        field[xidx, yidx] = add_subtract(field[xidx, yidx], emis, mode=mode)
-                    if dim == 3: field[xidx, yidx, zidx] = add_subtract(field[xidx, yidx, zidx], emis, mode=mode)
-                
-                else: #area emission
-                    
-                    length = row['LENGTE']
-                    x_upper = x_point + length / 2
-                    x_lower = x_point - length / 2
+        # --- domain check ---
+        if not (x[0] <= x_point <= x[-1] and y[0] <= y_point <= y[-1]):
+            n_skipped += 1
+            continue
 
-                    xidx_0 = np.argmax(x > x_lower) - 1
-                    xidx_1 = np.argmax(x >= x_upper) - 1
+        # --- indices ---
+        xidx = np.searchsorted(x, x_point) - 1
+        yidx = np.searchsorted(y, y_point) - 1
 
-                    width = row['BREEDTE']
-                    y_upper = y_point + width / 2
-                    y_lower = y_point - width / 2
+        # --- clamp safety (IMPORTANT FIX) ---
+        if xidx < 0 or xidx >= len(x) - 1 or yidx < 0 or yidx >= len(y) - 1:
+            n_skipped += 1
+            continue
 
-                    yidx_0 = np.argmax(y > y_lower) - 1
-                    yidx_1 = np.argmax(y >= y_upper) - 1
+        # -------------------------
+        # VERTICAL DIMENSION
+        # -------------------------
+        if dim == 3:
+            if zloc not in row or not np.isfinite(row[zloc]):
+                print('WARNING: point source file has no stack height info -> point sources are added to the lowest z')
+                z_point = z[0]
+            else:
+                z_point = float(row[zloc])
 
-                    if dim == 3: zidx = np.argmax(z >= z_point) - 1
+            zidx = np.searchsorted(z, z_point) - 1
+            zidx = max(min(zidx, len(z) - 2), 0)
+        else:
+            zidx = None
 
-                    if xidx_0 != xidx_1 and yidx_0 != yidx_1:
-                        for ix in range(xidx_0, xidx_1 + 1):
-                            for iy in range(yidx_0, yidx_1 + 1):
-                                fracx = (min(x_upper, x[ix + 1]) - max(x[ix], x_lower)) / length
-                                fracy = (min(y_upper, y[iy + 1]) - max(y[iy], y_lower)) / width
-                                update_field(ix, iy, iz=zidx)
-                    else:
-                        update_field(xidx_0, yidx_0, iz=zidx)
+        # -------------------------
+        # POINT SOURCE
+        # -------------------------
+        if row['TYPE'] == 'P':
+
+            if dim == 2:
+                field[xidx, yidx] += add_subtract(emis, mode)
+            else:
+                field[xidx, yidx, zidx] += add_subtract(emis, mode)
+
+            grid_updates += 1
+            n_mapped += 1
+
+        # -------------------------
+        # AREA SOURCE
+        # -------------------------
+        else:
+
+            length = row['LENGTE']
+            width = row['BREEDTE']
+
+            x_upper, x_lower = x_point + length / 2, x_point - length / 2
+            y_upper, y_lower = y_point + width / 2, y_point - width / 2
+
+            # skip if outside domain
+            if x_upper < x[0] or x_lower > x[-1] or y_upper < y[0] or y_lower > y[-1]:
+                n_skipped += 1
+                continue
+
+            xidx_0 = np.searchsorted(x, x_lower) - 1
+            xidx_1 = np.searchsorted(x, x_upper) - 1
+            yidx_0 = np.searchsorted(y, y_lower) - 1
+            yidx_1 = np.searchsorted(y, y_upper) - 1
+
+            point_used = False
+
+            for ix in range(xidx_0, xidx_1 + 1):
+                for iy in range(yidx_0, yidx_1 + 1):
+
+                    fracx = (min(x_upper, x[ix + 1]) - max(x[ix], x_lower)) / length
+                    fracy = (min(y_upper, y[iy + 1]) - max(y[iy], y_lower)) / width
+
+                    if fracx > 0 and fracy > 0:
+
+                        if dim == 2:
+                            field[ix, iy] += add_subtract(emis * fracx * fracy, mode)
+                        else:
+                            field[ix, iy, zidx] += add_subtract(emis * fracx * fracy, mode)
+
+                        grid_updates += 1
+                        point_used = True
+
+            if point_used:
+                n_mapped += 1
+            else:
+                n_skipped += 1
+
+    # -------------------------
+    # FINAL LOG (CORRECT)
+    # -------------------------
+    print("--------------------------------------------------")
+    print(f"INPUT POINTS: {n_in}")
+    print(f"MAPPED POINTS (P + O): {n_mapped}")
+    print(f"SKIPPED POINTS: {n_skipped}")
+    print(f"GRID CELL UPDATES (not points): {grid_updates}")
+    print("--------------------------------------------------")
                         
 
 def create3Dfromscratch(x, y, z, zh, projname, snap, pointfile, verbose=False, savepoints=False):
@@ -1095,9 +1212,6 @@ def checkbounds_3d(domainbounds, x, y, z):
     
     print( xminidx, xmaxidx, yminidx, ymaxidx, zminidx, zmaxidx )   
     return do_proceed, int(xminidx), int(xmaxidx), int(yminidx), int(ymaxidx), int(zminidx), int(zmaxidx)
-
-
-
 
 
   
@@ -1520,80 +1634,143 @@ def regrescat(dataframe, DoVerbose = False, v_order = 1, t_order = 0, h_order = 
 
 
 
-def gapfill(dataframe, DoVerbose = False, v_order = 1, t_order = 0, h_order = 1, h_shape = 'log'):
+def gapfill(dataframe, DoVerbose=False,
+            v_order=1, t_order=0,
+            h_order=1, h_shape='log',
+            a_order=1, area_shape='log'):
+
     from sklearn.preprocessing import PolynomialFeatures
     import statsmodels.api as sm
-    
-    # x_all = np.log10(dataframe.EMISSIE.     values)
-    # new_x = np.linspace(np.min(x_all),np.max(x_all),num=20)
-    
-    # VOLUMESTROOM
-    dataframe_v = dataframe.loc[(dataframe['VOLUMESTROOM'] > 0.)]
-    dataframe_v0 = dataframe.loc[(dataframe['VOLUMESTROOM'] == 0.)]
-    
-    x = np.log10(dataframe_v.EMISSIE.     values)
+    import numpy as np
+
+    # ================================================================
+    # 1. VOLUMESTROOM
+    # ================================================================
+    dataframe_v  = dataframe.loc[dataframe['VOLUMESTROOM'] > 0]
+    dataframe_v0 = dataframe.loc[dataframe['VOLUMESTROOM'] == 0]
+
+    x = np.log10(dataframe_v.EMISSIE.values)
     v = np.log10(dataframe_v.VOLUMESTROOM.values)
-    
-    x = PolynomialFeatures(v_order).fit_transform(x.reshape(-1,1))
-        
-    reg_v  = sm.OLS(v,x).fit()
+
+    x_poly = PolynomialFeatures(v_order).fit_transform(x.reshape(-1, 1))
+    reg_v  = sm.OLS(v, x_poly).fit()
     poly_v = np.poly1d(np.flipud(reg_v.params))
-    
+
     replace_v = []
-    for index, row in dataframe_v0.iterrows():
-        replace_v.append([index,10**poly_v(np.log10(row['EMISSIE']))])
+    for idx, row in dataframe_v0.iterrows():
+        replace_v.append([idx, 10**poly_v(np.log10(row['EMISSIE']))])
+
     del dataframe_v, dataframe_v0
-    
-    # TEMPERATUUR
-    dataframe_t  = dataframe.loc[(dataframe['TEMPERATUUR'] > 0.)]
-    dataframe_t0 = dataframe.loc[(dataframe['TEMPERATUUR'] == 0.)]
-    
-    x = np.log10(dataframe_t.EMISSIE.     values)
-    t =          dataframe_t.TEMPERATUUR. values
-    
-    x = PolynomialFeatures(t_order).fit_transform(x.reshape(-1,1))
-    
-    reg_t  = sm.OLS(t,x).fit()
+
+    # ================================================================
+    # 2. TEMPERATUUR
+    # ================================================================
+    dataframe_t  = dataframe.loc[dataframe['TEMPERATUUR'] > 0]
+    dataframe_t0 = dataframe.loc[dataframe['TEMPERATUUR'] == 0]
+
+    x = np.log10(dataframe_t.EMISSIE.values)
+    t = dataframe_t.TEMPERATUUR.values
+
+    x_poly = PolynomialFeatures(t_order).fit_transform(x.reshape(-1, 1))
+    reg_t  = sm.OLS(t, x_poly).fit()
     poly_t = np.poly1d(np.flipud(reg_t.params))
 
     replace_t = []
-    for index, row in dataframe_t0.iterrows():
-        replace_t.append([index,poly_t(np.log10(row['EMISSIE']))])
-    del dataframe_t, dataframe_t0     
-    
-    # HOOGTE
-    dataframe_h  = dataframe.loc[(dataframe['HOOGTE'] >  0.)]
-    dataframe_h0 = dataframe.loc[(dataframe['HOOGTE'] == 0.)]
-    x = np.log10(dataframe_h.EMISSIE.     values)
+    for idx, row in dataframe_t0.iterrows():
+        replace_t.append([idx, poly_t(np.log10(row['EMISSIE']))])
+
+    del dataframe_t, dataframe_t0
+
+    # ================================================================
+    # 3. HOOGTE
+    # ================================================================
+    dataframe_h  = dataframe.loc[dataframe['HOOGTE'] > 0]
+    dataframe_h0 = dataframe.loc[dataframe['HOOGTE'] == 0]
+
+    x = np.log10(dataframe_h.EMISSIE.values)
 
     if h_shape == 'log':
-        h = np.log10(dataframe_h.HOOGTE.     values)
+        h = np.log10(dataframe_h.HOOGTE.values)
     elif h_shape == 'exp':
-        h = np.log(dataframe_h.HOOGTE.     values)
+        h = np.log(dataframe_h.HOOGTE.values)
     else:
-        h =          dataframe_h.HOOGTE.      values
+        h = dataframe_h.HOOGTE.values
 
-    x = PolynomialFeatures(h_order).fit_transform(x.reshape(-1,1))
-    
-    if DoVerbose:
-        print(x)
-        
-    reg_h  = sm.OLS(h,x,hasconst=True).fit()
+    x_poly = PolynomialFeatures(h_order).fit_transform(x.reshape(-1, 1))
+    reg_h  = sm.OLS(h, x_poly, hasconst=True).fit()
     poly_h = np.poly1d(np.flipud(reg_h.params))
-    
+
     replace_h = []
-    for index, row in dataframe_h0.iterrows():
-        replace_h.append([index,poly_h(np.log10(row['EMISSIE']))])
-    del dataframe_h, dataframe_h0     
-    
+    for idx, row in dataframe_h0.iterrows():
+        replace_h.append([idx, poly_h(np.log10(row['EMISSIE']))])
+
     if len(replace_h) > 0:
-        replace_h = np.array(replace_h)
+        replace_h = np.array(replace_h, dtype=float)
+        if replace_h.ndim == 1:
+            replace_h = replace_h.reshape(1, 2)
+
         if h_shape == 'log':
-            replace_h[:,1] = 10**replace_h[:,1]
-        elif h_shape == 'exp': 
-            replace_h[:,1] = np.exp(replace_h[:,1])
-        
-    return replace_v, replace_t, replace_h
+            replace_h[:, 1] = 10**replace_h[:, 1]
+        elif h_shape == 'exp':
+            replace_h[:, 1] = np.exp(replace_h[:, 1])
+
+    del dataframe_h, dataframe_h0
+
+    # ================================================================
+    # 4. UITSTROOMOPENING_M2
+    # ================================================================
+    dataframe_a  = dataframe.loc[dataframe['UITSTROOMOPENING_M2'] > 0]
+    dataframe_a0 = dataframe.loc[dataframe['UITSTROOMOPENING_M2'] == 0]
+
+    replace_a = []
+
+    # Only attempt regression if enough samples exist
+    if len(dataframe_a) > 3:
+
+        x = np.log10(dataframe_a.EMISSIE.values)
+
+        if area_shape == 'log':
+            a = np.log10(dataframe_a.UITSTROOMOPENING_M2.values)
+        elif area_shape == 'exp':
+            a = np.log(dataframe_a.UITSTROOMOPENING_M2.values)
+        else:
+            a = dataframe_a.UITSTROOMOPENING_M2.values
+
+        x_poly = PolynomialFeatures(a_order).fit_transform(x.reshape(-1, 1))
+        reg_a  = sm.OLS(a, x_poly).fit()
+        poly_a = np.poly1d(np.flipud(reg_a.params))
+
+        for idx, row in dataframe_a0.iterrows():
+            replace_a.append([idx, poly_a(np.log10(row['EMISSIE']))])
+
+    # Fallback if regression could not be used
+    if len(replace_a) == 0 and len(dataframe_a0) > 0:
+
+        # Engineering fallback using stack height
+        for idx, row in dataframe_a0.iterrows():
+            H = row['HOOGTE']
+            if H > 0:
+                # Diameter estimate: D = H / 30
+                D = H / 30.0
+                A = (np.pi / 4.0) * D * D
+                replace_a.append([idx, A])
+
+    # Convert safely to ndarray
+    replace_a = np.array(replace_a, dtype=float)
+    if replace_a.size > 0 and replace_a.ndim == 1:
+        replace_a = replace_a.reshape(1, 2)
+
+    # Undo transforms for regression-based fills
+    if replace_a.size > 0 and len(dataframe_a) > 3:
+        if area_shape == 'log':
+            replace_a[:, 1] = 10**replace_a[:, 1]
+        elif area_shape == 'exp':
+            replace_a[:, 1] = np.exp(replace_a[:, 1])
+
+    del dataframe_a, dataframe_a0
+
+    # ================================================================
+    return replace_v, replace_t, replace_h, replace_a
 
 
 
@@ -1668,7 +1845,7 @@ def data2netc_old(data, targetdir, nprocx = 999, nprocy = 999, tracer ='null', h
         
 
         
-def data2netc(data, targetdir, nprocx = 999, nprocy = 999, tracer ='null', minute = 99,hour = 99, day = 99, month = 99, year = 9999):
+def data2netc(data, targetdir, author, email, nprocx = 999, nprocy = 999, tracer ='null', minute = 99,hour = 99, day = 99, month = 99, year = 9999):
     
     import netCDF4 as netc
     import datetime as datetime
@@ -1693,8 +1870,8 @@ def data2netc(data, targetdir, nprocx = 999, nprocy = 999, tracer ='null', minut
                             "and chimney height (m)"
                              
         tfobj.valid       = f"Valid in the hour starting at: {year:04d}-{month:02d}-{day:02d} {hour:02d}"
-        tfobj.author      = 'A. Doyennel (VU)'
-        tfobj.email       = 'a.doyennel@vu.nl'
+        tfobj.author      = author
+        tfobj.email       = email
 
         # -- Declaration of dimensions and variables
         dim_n     = tfobj.createDimension('n', len(data))
@@ -1730,11 +1907,134 @@ def data2netc(data, targetdir, nprocx = 999, nprocy = 999, tracer ='null', minut
         var_y.units  = 'm'
         var_yi.units = 'unitless'
         var_z.units  = 'm'
-        var_e.units  = f' per hour (kg {tracer} hour-1)'
+        var_e.units  = f'kg hour-1'
         var_v.units  = 'm3/s'
         var_t.units  = 'K'
         var_s.units  = 'unitless'
         
-        tfobj.close()  
+        tfobj.close() 
+
+
+def df2list_new(df, xt_list, yt_list, tracer_name, domain_bounds=None):
+    """
+    Converts dataframe to point source array using grid-based indexing from les_grid.
+
+    Parameters:
+        df (DataFrame): Input emission dataframe
+        les_grid (GridDales): Grid object with xt, yt arrays
+        tracer_name (str): Name of the tracer (e.g. 'co2', 'ch4')
+        domain_bounds (tuple): Optional spatial filter (xmin, xmax, ymin, ymax)
+
+    Returns:
+        np.ndarray: Array with columns [x, x_idx, y, y_idx, emission, volume, temp, height, stack_exit_area, tracer_name]
+    """
+
+    # Optional spatial bounding box
+    if domain_bounds:
+        xmin, xmax, ymin, ymax = domain_bounds
+        df = df[(df['XCO_EMISSIEPUNT_HARM'] > xmin) &
+                (df['XCO_EMISSIEPUNT_HARM'] <= xmax) &
+                (df['YCO_EMISSIEPUNT_HARM'] > ymin) &
+                (df['YCO_EMISSIEPUNT_HARM'] <= ymax)]
+
+    # Apply basic physical constraints
+    df_selection = df[
+        (df['VOLUMESTROOM'] > 0) &
+        (df['TEMPERATUUR'] > 0) &
+        (df['HOOGTE'] > 0) &
+        (df['UITSTROOMOPENING_M2'] > 0)
+    ].copy()
+
+    if df_selection.empty:
+        return np.empty((0, 9))  # Return empty array with correct shape
+
+    # Clip to grid bounds
+    x_min, x_max = xt_list.min(), xt_list.max()
+    y_min, y_max = yt_list.min(), yt_list.max()
+
+    df_selection = df_selection[
+        (df_selection['XCO_EMISSIEPUNT_HARM'] >= x_min) &
+        (df_selection['XCO_EMISSIEPUNT_HARM'] <= x_max) &
+        (df_selection['YCO_EMISSIEPUNT_HARM'] >= y_min) &
+        (df_selection['YCO_EMISSIEPUNT_HARM'] <= y_max)
+    ].copy()
+
+    if df_selection.empty:
+        return np.empty((0, 9))
+
+    # Get emission coordinates
+    x_emis = df_selection['XCO_EMISSIEPUNT_HARM'].values
+    y_emis = df_selection['YCO_EMISSIEPUNT_HARM'].values
+
+    # Find closest grid index (DALES expects indices starting at 2)
+    x_idx = np.array([np.argmin(np.abs(xt_list - x)) for x in x_emis]) + 2
+    y_idx = np.array([np.argmin(np.abs(yt_list - y)) for y in y_emis]) + 2
+
+    df_selection['X_IDX'] = x_idx
+    df_selection['Y_IDX'] = y_idx
+    df_selection['TRACER_NAME'] = tracer_name
+
+    # Build array
+    data = df_selection[['XCO_EMISSIEPUNT_HARM', 'X_IDX',
+                         'YCO_EMISSIEPUNT_HARM', 'Y_IDX',
+                         'EMISSIE', 'VOLUMESTROOM', 'TEMPERATUUR', 'HOOGTE', 'UITSTROOMOPENING_M2', 'TRACER_NAME', 'SNAP']].to_numpy()
+
+    return np.nan_to_num(data)
+
+
+
+def data2netc_point(data, author, email, targetdir, tracer='null', minute=99, hour=99, day=99, month=99, year=9999):
+    import netCDF4 as netc
+    import datetime as datetime
+    import os
+
+    tracer = tracer.lower()  # Normalize tracer name
+
+    tfname = os.path.join(
+        targetdir,
+        f'pointsources.{year:04d}{month:02d}{day:02d}{hour:02d}{minute:02d}.{tracer}.nc'
+    )
+
+    with netc.Dataset(tfname, 'w') as tfobj:
+        # Global attributes
+        tfobj.title = f"Point sources for online plume rise calculations"
+        tfobj.history = "Created: " + datetime.datetime.now().strftime("%d %b %Y")
+        tfobj.description = (
+            f"Processed data from Emissieregistratie for tracer {tracer}. "
+            "Contains emission location (m), emission strength (kg/h), volume flux (m³/s), "
+            "temperature (K), chimney height (m), and stack exit area (m2)."
+        )
+        tfobj.valid = f"Valid for: {year:04d}-{month:02d}-{day:02d} {hour:02d}:00"
+        tfobj.author = author
+        tfobj.email = email
+
+        # Dimensions
+        n = len(data)
+        tfobj.createDimension('n', n)
+
+        # Variables
+        tfobj.createVariable('x',           'f4', ('n'))[:] = data[:, 0]
+        tfobj.createVariable('x_idx',       'i4', ('n'))[:] = data[:, 1]
+        tfobj.createVariable('y',           'f4', ('n'))[:] = data[:, 2]
+        tfobj.createVariable('y_idx',       'i4', ('n'))[:] = data[:, 3]
+        tfobj.createVariable('height',      'f4', ('n'))[:] = data[:, 7]
+        tfobj.createVariable('stack_exit_area',      'f4', ('n'))[:] = data[:, 8]
+        tfobj.createVariable('emission',    'f4', ('n'))[:] = data[:, 4]
+        tfobj.createVariable('volume',      'f4', ('n'))[:] = data[:, 5]
+        tfobj.createVariable('temperature', 'f4', ('n'))[:] = data[:, 6] + 273.15
+
+        tfobj.tracer_name = tracer
+
+        # Units
+        tfobj.variables['x'].units           = 'm'
+        tfobj.variables['x_idx'].units       = 'grid index'
+        tfobj.variables['y'].units           = 'm'
+        tfobj.variables['y_idx'].units       = 'grid index'
+        tfobj.variables['height'].units      = 'm'
+        tfobj.variables['stack_exit_area'].units      = 'm-2'
+        tfobj.variables['emission'].units    = f'kg hour-1'
+        tfobj.variables['volume'].units      = 'm3/s'
+        tfobj.variables['temperature'].units = 'K'
+
 
 

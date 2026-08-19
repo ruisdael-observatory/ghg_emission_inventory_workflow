@@ -1,4 +1,4 @@
-# Creates DALES grid
+# Creates DALES grid (TU Delft setting..)
 import numpy as np
 class GridDales:
   def __init__(self, input):

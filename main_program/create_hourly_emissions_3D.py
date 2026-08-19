@@ -24,14 +24,14 @@ import glob
 import shutil
 import os
 import pandas as pd
-
 import sys
+import temp_disaggregation_new_cams_temp_prof
 from emission_preparation_setting import (targetdir_ruisdael_area_total_static,
                                           output_dir_create_hourly_emissions_3D, spec_name, xres, yres,
                                           xn, yn, snaplist, x0, y0, zmax, year_start,
                                           month_start, day_start, hour_start, year_end,
-                                          month_end, day_end, hour_end
-)
+                                          month_end, day_end, hour_end, x_offset, y_offset, author, email,
+                                          noxdir, temp_prof_file )
 
 
 #self.setting = EmissionPreparationSettings()
@@ -45,8 +45,8 @@ class Final_3D_input:
         self.xn = xn
         self.yn = yn
         self.snaplist = snaplist
-        self.x0 = x0
-        self.y0 = y0
+        self.x0 = x0+x_offset+self.xres/2
+        self.y0 = y0+y_offset+self.yres/2
         self.zmax = zmax
         self.year_start = year_start
         self.month_start = month_start
@@ -67,7 +67,8 @@ class Final_3D_input:
             7: '7_road',
             8: '8_mobile',
             9: '9_waste',
-            10: '10_agriculture'
+            10: '10_agriculture',
+            11: '11_aviation'
         }
 
     def create_output_directory(self):
@@ -80,8 +81,8 @@ class Final_3D_input:
                 os.remove(f)
 
     def create_settings_file(self):
-        xmin = self.x0
-        ymin = self.y0
+        xmin = self.x0 #+self.xres/2
+        ymin = self.y0 #+self.yres/2
         startyear = self.year_start
         startmonth = self.month_start
         startday = self.day_start
@@ -90,11 +91,14 @@ class Final_3D_input:
         time_array = pd.Series(
             pd.date_range(start=f'{startyear}-{startmonth}-{startday} {starthour}:00:00',
                           end=f'{self.year_end}-{self.month_end}-{self.day_end} '
-                              f'{self.hour_end}:00:00', freq='H'))
+                              f'{self.hour_end}:00:00', freq='h'))
         runlength = time_array.size - 1  # should be minus one time point to work correctly
 
-        xmax = xmin + int(self.xn * self.xres)
-        ymax = ymin + int(self.yn * self.yres)
+        #xmax = xmin + int(self.xn * self.xres)
+        #ymax = ymin + int(self.yn * self.yres)
+        
+        xmax = xmin + self.xn * self.xres
+        ymax = ymin + self.yn * self.yres
 
         xmax = xmax - self.xres  # should be minus one grid point to work correctly
         ymax = ymax - self.yres  # should be minus one grid point to work correctly
@@ -132,8 +136,10 @@ class Final_3D_input:
     def create_emissions(self):
         domain_bounds, tstart, tend, tracers, sources, categories = reademisoptions("settings_hourly.txt", show_log=True)
         print(domain_bounds)
+        # Load temporal profiles (hour, week, month)
+        tprof_hour, tprof_week, tprof_mnth = temp_disaggregation_new_cams_temp_prof.loadsnap_cams(self.spec_name, self.year_start, noxdir, temp_prof_file, x0,  y0, xres, yres, xn, yn )
         writereademission_3d(self.targetdir, self.output_dir, domain_bounds, tstart, tend, tracers,
-                             sources, categories, show_log=True)
+                             sources, categories, tprof_hour, tprof_week, tprof_mnth, author, email, show_log=True)
 
 
 if __name__ == "__main__":
