@@ -1,0 +1,8 @@
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+# Microsoft Office temporary files
+~$*.xlsx
+~$*.xls
